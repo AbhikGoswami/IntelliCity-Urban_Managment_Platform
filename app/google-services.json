@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "546491864177",
+    "project_id": "urban-management-platform",
+    "storage_bucket": "urban-management-platform.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:546491864177:android:6b9601eeaf6df084d337d0",
+        "android_client_info": {
+          "package_name": "com.abhik.urbanmanagementplatform"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCP17Z4e1hT7lubKdQLfv_Gvm68YLAbK0s"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
