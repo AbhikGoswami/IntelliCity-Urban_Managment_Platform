@@ -11,6 +11,7 @@ import androidx.core.view.GravityCompat
 import androidx.drawerlayout.widget.DrawerLayout
 import com.abhik.urbanmanagementplatform.R
 import com.abhik.urbanmanagementplatform.fragments.HomeFragment
+import com.abhik.urbanmanagementplatform.fragments.ProfileFragment
 import com.google.android.material.navigation.NavigationView
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
@@ -82,7 +83,11 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
                     .replace(R.id.fragment_container, HomeFragment()).commit()
             }
             R.id.nav_profile -> {
-                // TODO: We will create and navigate to ProfileFragment in a later phase
+                // UPDATED: Navigate to the ProfileFragment
+                supportFragmentManager.beginTransaction()
+                    .replace(R.id.fragment_container, ProfileFragment())
+                    .addToBackStack(null) // Allows user to press back to return to home
+                    .commit()
             }
             R.id.nav_track_status -> {
                 // TODO: We will create and navigate to TrackStatusFragment in a later phase
@@ -109,4 +114,3 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         }
     }
 }
-

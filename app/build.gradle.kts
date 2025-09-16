@@ -139,6 +139,9 @@ dependencies {
     implementation("com.google.firebase:firebase-auth") // Just this one line is needed for Auth.
 
     implementation("com.google.firebase:firebase-storage-ktx:21.0.1")
+
+    // For loading images from URLs
+    implementation("com.github.bumptech.glide:glide:4.16.0")
 }
 
 

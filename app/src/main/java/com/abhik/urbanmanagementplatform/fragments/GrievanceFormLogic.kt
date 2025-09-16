@@ -92,7 +92,11 @@ class GrievanceFormFragment : Fragment() {
 
         if (imageUri != null) {
             // If there's an image, upload it first
-            val fileName = "grievances/${UUID.randomUUID()}.jpg"
+            //val fileName = "grievances/${UUID.randomUUID()}.jpg"
+
+            val folderName = departmentName.replace(" ", "_").lowercase(Locale.getDefault())
+            val fileName = "grievances/$folderName/${UUID.randomUUID()}.jpg"
+
             val storageRef = storage.reference.child(fileName)
             storageRef.putFile(imageUri!!)
                 .addOnSuccessListener {
