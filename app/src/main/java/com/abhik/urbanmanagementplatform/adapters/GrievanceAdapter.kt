@@ -35,7 +35,6 @@ class GrievanceAdapter(private val grievanceList: List<Grievance>) :
         holder.titleTextView.text = grievance.title
         holder.departmentTextView.text = "Department: ${grievance.department}"
 
-        // Format the timestamp to a readable date
         val sdf = SimpleDateFormat("MMM dd, yyyy", Locale.getDefault())
         holder.dateTextView.text = "Submitted on: ${sdf.format(grievance.timestamp.toDate())}"
 

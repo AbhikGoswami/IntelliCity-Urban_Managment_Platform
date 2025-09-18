@@ -8,11 +8,12 @@
     tools:context=".activities.MainActivity"
     tools:openDrawer="start">
 
-    <!-- This is the main content view that includes the Toolbar and the area for fragments -->
+
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:orientation="vertical">
+        android:orientation="vertical"
+        android:background="@drawable/backgroundimg">
 
         <androidx.appcompat.widget.Toolbar
             android:id="@+id/toolbar"
@@ -23,7 +24,7 @@
             android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar"
             app:popupTheme="@style/ThemeOverlay.AppCompat.Light" />
 
-        <!-- This FrameLayout is the container where all your fragments (Home, Profile, etc.) will be displayed -->
+
         <FrameLayout
             android:id="@+id/fragment_container"
             android:layout_width="match_parent"
@@ -31,7 +32,6 @@
 
     </LinearLayout>
 
-    <!-- This is the navigation drawer view that slides in from the side -->
     <com.google.android.material.navigation.NavigationView
         android:id="@+id/nav_view"
         android:layout_width="wrap_content"
