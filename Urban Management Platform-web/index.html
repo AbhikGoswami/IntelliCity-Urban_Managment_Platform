@@ -54,7 +54,7 @@
             firebase.initializeApp(firebaseConfig);
             const db = firebase.firestore();
 
-            db.collection("reports")
+            db.collection("grievances")
               .orderBy("timestamp", "desc") 
               .onSnapshot((querySnapshot) => {
                 
@@ -106,5 +106,6 @@
 
 </body>
 </html>
+
 
 
