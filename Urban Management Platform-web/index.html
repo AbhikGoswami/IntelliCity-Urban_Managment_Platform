@@ -1,111 +1,281 @@
 <!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Urban Issues Dashboard</title>
-    <style>
-        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; background-color: #f4f4f9; color: #333; margin: 0; padding: 20px; }
-        h1 { color: #444; text-align: center; }
-        #reports-container { max-width: 800px; margin: 20px auto; background: white; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); padding: 20px; }
-        .report-card { border-bottom: 1px solid #eee; padding: 15px; }
-        .report-card:last-child { border-bottom: none; }
-        .report-description { font-size: 1.1em; font-weight: 500; }
-        .report-timestamp { font-size: 0.8em; color: #888; margin-top: 5px; }
-        #placeholder { color: #999; text-align: center; padding: 40px; }
-        .error-message { padding: 40px; text-align: center; color: #D8000C; background-color: #FFD2D2; border-radius: 8px; }
-    </style>
-</head>
-<body>
-
-    <h1>Live Citizen Reports</h1>
-
-    <div id="reports-container">
-        <div id="placeholder">Listening for new reports...</div>
-        <!-- Reports will be dynamically added here -->
-    </div>
+ <html lang="en">
+ <head>
+     <meta charset="UTF-8">
+     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+     <title>Civic Management Portal</title>
     
-    <script src="https://www.gstatic.com/firebasejs/9.6.7/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.6.7/firebase-firestore-compat.js"></script>
+     <script src="https://cdn.tailwindcss.com"></script>
+ </head>
+ <body class="bg-gray-100 min-h-screen">
+ 
+     
+     <div id="login-view" class="flex items-center justify-center min-h-screen">
+         <div class="w-full max-w-md p-8 space-y-6 bg-white rounded-xl shadow-lg">
+             <h2 class="text-3xl font-bold text-center text-gray-800">Official Portal Login</h2>
+             <form id="login-form" class="space-y-6">
+                 <div>
+                     <label for="UserID" class="text-sm font-medium text-gray-700">Email (User ID)</label>
+                     <input id="UserID" type="text" required
+                         class="w-full px-4 py-2 mt-1 text-gray-700 bg-gray-100 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                         placeholder="official@city.gov">
+                 </div>
+                 <div>
+                     <label for="login-password" class="text-sm font-medium text-gray-700">Password</label>
+                     <input id="login-password" type="password" required
+                         class="w-full px-4 py-2 mt-1 text-gray-700 bg-gray-100 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                         placeholder="••••••••">
+                 </div>
+                 <p id="login-error" class="text-sm text-red-600 hidden"></p>
+                 <button type="submit"
+                     class="w-full py-2 px-4 font-semibold text-white bg-blue-600 rounded-lg shadow-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2">
+                     Sign In
+                 </button>
+             </form>
+         </div>
+     </div>
+ 
+     
+     <div id="dashboard-view" class="hidden min-h-screen">
+         
+         <nav class="bg-white shadow-md">
+             <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                 <div class="flex justify-between h-16">
+                     <div class="flex items-center">
+                         <span id="welcome-message" class="text-xl font-bold text-blue-600">Civic Dashboard</span>
+                     </div>
+                     <div class="flex items-center">
+                         <button id="logout-button"
+                             class="px-3 py-2 text-sm font-medium text-gray-500 bg-gray-100 rounded-lg hover:bg-gray-200 hover:text-gray-700">
+                             Logout
+                         </button>
+                     </div>
+                 </div>
+             </div>
+         </nav>
 
-    <script>
-        
-        const firebaseConfig = {
-            apiKey: "AIzaSyAy7ibJyu2Qn_BPTOT-Kmu-aGQ5X9jjOZ0",
-            authDomain: "urban-management-platform.firebaseapp.com",
-            projectId: "urban-management-platform",
-            storageBucket: "urban-management-platform.appspot.com",
-            messagingSenderId: "546491864177",
-            appId: "1:546491864177:web:8c330c7f7b944a5fd337d0",
-            measurementId: "G-CEVE67J0ZC"
-        };
-    
-        const reportsContainer = document.getElementById('reports-container');
-        const placeholder = document.getElementById('placeholder');
-
-        if (firebaseConfig.apiKey === "YOUR_API_KEY" || firebaseConfig.projectId === "YOUR_PROJECT_ID") {
-            console.error("FIREBASE CONFIGURATION ERROR: Please paste your project's firebaseConfig object into index.html");
-            
-            reportsContainer.innerHTML = `<div class="error-message">
-                <h2>Configuration Error</h2>
-                <p>Your Firebase configuration is missing or incorrect. Please copy the <code>firebaseConfig</code> object from your Firebase project settings and paste it into the <code>index.html</code> file to connect to the backend.</p>
-            </div>`;
-        } else {
-            firebase.initializeApp(firebaseConfig);
-            const db = firebase.firestore();
-
-            db.collection("grievances")
-              .orderBy("timestamp", "desc") 
-              .onSnapshot((querySnapshot) => {
-                
-                if (querySnapshot.empty) {
-                    placeholder.style.display = 'block';
-                    reportsContainer.innerHTML = ''; 
-                    reportsContainer.appendChild(placeholder);
-                } else {
-                    placeholder.style.display = 'none';
-                    reportsContainer.innerHTML = ''; 
-                }
-
-                
-                querySnapshot.forEach((doc) => {
-                    const reportData = doc.data();
-
-                    const card = document.createElement('div');
-                    card.className = 'report-card';
-
-                    const description = document.createElement('p');
-                    description.className = 'report-description';
-                    description.textContent = reportData.description;
-
-                    const timestamp = document.createElement('p');
-                    timestamp.className = 'report-timestamp';
-                    
-                    if (reportData.timestamp && reportData.timestamp.toDate) {
-                        const date = reportData.timestamp.toDate();
-                        timestamp.textContent = `Reported on: ${date.toLocaleDateString()} at ${date.toLocaleTimeString()}`;
-                    } else {
-                        timestamp.textContent = 'Timestamp not available';
-                    }
-                    
-                    card.appendChild(description);
-                    card.appendChild(timestamp);
-                    reportsContainer.appendChild(card);
-                });
-            }, (error) => {
-                
-                console.error("Firestore Error: ", error);
-                 reportsContainer.innerHTML = `<div class="error-message">
-                    <h2>Connection Error</h2>
-                    <p>Could not connect to the database. Please check the console for details and ensure your Firestore security rules are correctly set up.</p>
-                </div>`;
-            });
-        }
-
-    </script>
-
-</body>
-</html>
-
-
-
+         <main class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
+             <div id="department-selection-view">
+                 <h2 class="text-2xl font-semibold text-gray-800 mb-4">Select a Department</h2>
+                 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                     <div onclick="showDepartmentGrievances('Electricity')"
+                         class="p-6 bg-white rounded-xl shadow-lg cursor-pointer hover:shadow-xl transition-shadow">
+                         <h3 class="text-xl font-bold text-gray-900">Electricity</h3>
+                     </div>
+                     <div onclick="showDepartmentGrievances('Water Supply')"
+                         class="p-6 bg-white rounded-xl shadow-lg cursor-pointer hover:shadow-xl transition-shadow">
+                         <h3 class="text-xl font-bold text-gray-900">Water Supply</h3>
+                     </div>
+                     <div onclick="showDepartmentGrievances('Roads')"
+                         class="p-6 bg-white rounded-xl shadow-lg cursor-pointer hover:shadow-xl transition-shadow">
+                         <h3 class="text-xl font-bold text-gray-900">Roads & Transport</h3>
+                     </div>
+                     <div onclick="showDepartmentGrievances('Cleaning')"
+                         class="p-6 bg-white rounded-xl shadow-lg cursor-pointer hover:shadow-xl transition-shadow">
+                         <h3 class="text-xl font-bold text-gray-900">Cleaning & Waste</h3>
+                     </div>
+                     <div onclick="showDepartmentGrievances('Maintenance')"
+                         class="p-6 bg-white rounded-xl shadow-lg cursor-pointer hover:shadow-xl transition-shadow">
+                         <h3 class="text-xl font-bold text-gray-900">Public Maintenance</h3>
+                     </div>
+                     <div onclick="showDepartmentGrievances('Other')"
+                         class="p-6 bg-white rounded-xl shadow-lg cursor-pointer hover:shadow-xl transition-shadow">
+                         <h3 class="text-xl font-bold text-gray-900">Other</h3>
+                     </div>
+                 </div>
+             </div>
+ 
+             <div id="grievance-list-view" class="hidden">
+                 <button onclick="showDepartmentSelection()"
+                     class="mb-4 px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700">
+                     &larr; Back to Departments
+                 </button>
+                 <h2 id="grievance-list-title" class="text-2xl font-semibold text-gray-800 mb-4">Grievances</h2>
+                 <div id="loading-spinner" class="text-center p-10 hidden">
+                     <p>Loading grievances...</p>
+                 </div>
+                 <div id="grievance-list-container" class="space-y-4">
+                     
+                 </div>
+             </div>
+         </main>
+     </div>
+ 
+     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+ 
+     <script>
+         
+         const firebaseConfig = {
+             // This part has been removed for security issues. contact me
+         };
+ 
+         
+         firebase.initializeApp(firebaseConfig);
+         const db = firebase.firestore();
+ 
+         const loginView = document.getElementById('login-view');
+         const dashboardView = document.getElementById('dashboard-view');
+         const departmentSelectionView = document.getElementById('department-selection-view');
+         const grievanceListView = document.getElementById('grievance-list-view');
+ 
+         const loginForm = document.getElementById('login-form');
+         const loginError = document.getElementById('login-error');
+         const logoutButton = document.getElementById('logout-button');
+         const welcomeMessage = document.getElementById('welcome-message');
+         const grievanceListContainer = document.getElementById('grievance-list-container');
+         const grievanceListTitle = document.getElementById('grievance-list-title');
+         const loadingSpinner = document.getElementById('loading-spinner');
+ 
+         let unsubscribeFromGrievances = null;
+ 
+         function showView(viewToShow) {
+             loginView.classList.add('hidden');
+             dashboardView.classList.add('hidden');
+             departmentSelectionView.classList.add('hidden');
+             grievanceListView.classList.add('hidden');
+ 
+             document.getElementById(viewToShow).classList.remove('hidden');
+ 
+             if (viewToShow.startsWith('department-') || viewToShow.startsWith('grievance-')) {
+                 dashboardView.classList.remove('hidden');
+             }
+         }
+ 
+         const loggedInUserEmail = sessionStorage.getItem('loggedInUserEmail');
+         if (loggedInUserEmail) {
+             welcomeMessage.textContent = `Welcome, ${loggedInUserEmail}`;
+             showView('department-selection-view');
+         } else {
+             showView('login-view');
+         }
+ 
+         loginForm.addEventListener('submit', (e) => {
+             e.preventDefault();
+             const email = document.getElementById('UserID').value;
+             const password = document.getElementById('login-password').value;
+             loginError.classList.add('hidden');
+ 
+ 
+             db.collection("officials")
+                 .where("UserID", "==", email)
+                 .limit(1)
+                 .get()
+                 .then((querySnapshot) => {
+                     if (querySnapshot.empty) {
+                         
+                         loginError.textContent = "Error: Invalid email or password.";
+                         loginError.classList.remove('hidden');
+                         return;
+                     }
+ 
+                     const userDoc = querySnapshot.docs[0];
+                     const userData = userDoc.data();
+ 
+                     
+                     if (userData.password === password) {
+                         
+                         sessionStorage.setItem('loggedInUserEmail', email);
+                         welcomeMessage.textContent = `Welcome, ${email}`;
+                         showView('department-selection-view');
+                     } else {
+                         
+                         loginError.textContent = "Error: Invalid email or password.";
+                         loginError.classList.remove('hidden');
+                     }
+                 })
+                 .catch((error) => {
+                     console.error("Login failed:", error);
+                     loginError.textContent = "An error occurred. Please check security rules.";
+                     loginError.classList.remove('hidden');
+                 });
+         });
+ 
+         logoutButton.addEventListener('click', () => {
+             sessionStorage.removeItem('loggedInUserEmail');
+             if (unsubscribeFromGrievances) {
+                 unsubscribeFromGrievances();
+             }
+             showView('login-view');
+         });
+ 
+         
+         window.showDepartmentSelection = () => {
+             if (unsubscribeFromGrievances) {
+                 unsubscribeFromGrievances();
+             }
+             showView('department-selection-view');
+         }
+ 
+         window.showDepartmentGrievances = (departmentName) => {
+             showView('grievance-list-view');
+             grievanceListTitle.textContent = `Grievances for ${departmentName}`;
+             loadingSpinner.classList.remove('hidden');
+             grievanceListContainer.innerHTML = '';
+             
+             const grievancesRef = db.collection("grievances");
+             const q = grievancesRef
+                 .where("department", "==", departmentName)
+                 .orderBy("timestamp", "desc");
+ 
+             unsubscribeFromGrievances = q.onSnapshot((querySnapshot) => {
+                 loadingSpinner.classList.add('hidden');
+                 grievanceListContainer.innerHTML = ''; 
+ 
+                 if (querySnapshot.empty) {
+                     grievanceListContainer.innerHTML = '<p class="text-gray-500 text-center">No grievances found for this department.</p>';
+                     return;
+                 }
+                 querySnapshot.forEach((doc) => {
+                     renderGrievanceCard(doc.id, doc.data());
+                 });
+ 
+             }, (error) => {
+                 console.error("Error fetching grievances: ", error);
+                 loadingSpinner.classList.add('hidden');
+                 grievanceListContainer.innerHTML = '<p class="text-red-500 text-center">Error: Could not load data. See console for details (check your Firestore indexes and security rules).</p>';
+             });
+         }
+ 
+         function renderGrievanceCard(docId, data) {
+             const card = document.createElement('div');
+             card.className = 'p-4 bg-white rounded-lg shadow-md';
+             const date = data.timestamp ? data.timestamp.toDate().toLocaleString() : 'N/A';
+             let statusColor = 'bg-blue-100 text-blue-800';
+             if (data.status === 'In Progress') statusColor = 'bg-yellow-100 text-yellow-800';
+             else if (data.status === 'Resolved') statusColor = 'bg-green-100 text-green-800';
+ 
+             card.innerHTML = `
+                 <div class="flex justify-between items-center">
+                     <h3 class="text-lg font-semibold">${data.title || 'No Title'}</h3>
+                     <span class="px-3 py-1 text-xs font-semibold ${statusColor} rounded-full">${data.status || 'Submitted'}</span>
+                 </div>
+                 <p class="text-gray-700 mt-2">${data.description}</p>
+                 <p class="text-sm text-gray-500 mt-3">Reported by UserID: <span class="font-medium">${data.userId ? data.userId.substring(0, 8) + '...' : 'N/A'}</span></p>
+                 <p class="text-sm text-gray-500 mt-1">Reported on: <span class="font-medium">${date}</span></p>
+                 ${data.imageUrl ? `<img src="${data.imageUrl}" alt="Grievance Image" class="mt-4 rounded-lg max-h-60 cursor-pointer" onclick="window.open('${data.imageUrl}', '_blank')">` : ''}
+                 <div class="mt-4 pt-4 border-t border-gray-200 space-x-2">
+                     <button onclick="updateStatus('${docId}', 'In Progress')" class="px-3 py-1 text-sm font-medium text-white bg-yellow-500 rounded-lg hover:bg-yellow-600">Mark as In Progress</button>
+                     <button onclick="updateStatus('${docId}', 'Resolved')" class="px-3 py-1 text-sm font-medium text-white bg-green-500 rounded-lg hover:bg-green-600">Mark as Resolved</button>
+                 </div>
+             `;
+             grievanceListContainer.appendChild(card);
+         }
+         
+         window.updateStatus = (docId, newStatus) => {
+             const grievanceDocRef = db.collection("grievances").doc(docId);
+             
+             grievanceDocRef.update({
+                 status: newStatus
+             })
+             .then(() => {
+                 
+             })
+             .catch((error) => {
+                 console.error("Error updating status: ", error);
+                 alert("Could not update status. See console for details.");
+             });
+         }
+     </script>
+ </body>
+ </html>
