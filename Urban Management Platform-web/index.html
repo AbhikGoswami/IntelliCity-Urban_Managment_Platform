@@ -1,21 +1,19 @@
 <!DOCTYPE html>
- <html lang="en">
- <head>
+<html lang="en">
+<head>
      <meta charset="UTF-8">
      <meta name="viewport" content="width=device-width, initial-scale=1.0">
      <title>Civic Management Portal</title>
-    
      <script src="https://cdn.tailwindcss.com"></script>
- </head>
- <body class="bg-gray-100 min-h-screen">
- 
-     
+</head>
+<body class="bg-gray-100 min-h-screen">
+
      <div id="login-view" class="flex items-center justify-center min-h-screen">
          <div class="w-full max-w-md p-8 space-y-6 bg-white rounded-xl shadow-lg">
              <h2 class="text-3xl font-bold text-center text-gray-800">Official Portal Login</h2>
              <form id="login-form" class="space-y-6">
                  <div>
-                     <label for="UserID" class="text-sm font-medium text-gray-700">Email (User ID)</label>
+                     <label for="UserID" class="text-sm font-medium text-gray-700">Username</label>
                      <input id="UserID" type="text" required
                          class="w-full px-4 py-2 mt-1 text-gray-700 bg-gray-100 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                          placeholder="official@city.gov">
@@ -34,10 +32,8 @@
              </form>
          </div>
      </div>
- 
-     
+
      <div id="dashboard-view" class="hidden min-h-screen">
-         
          <nav class="bg-white shadow-md">
              <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                  <div class="flex justify-between h-16">
@@ -84,7 +80,7 @@
                      </div>
                  </div>
              </div>
- 
+
              <div id="grievance-list-view" class="hidden">
                  <button onclick="showDepartmentSelection()"
                      class="mb-4 px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700">
@@ -100,25 +96,29 @@
              </div>
          </main>
      </div>
- 
+
      <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
      <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
- 
+
      <script>
-         
          const firebaseConfig = {
-             // This part has been removed for security issues. contact me
+             apiKey: "AIzaSyAy7ibJyu2Qn_BPTOT-Kmu-aGQ5X9jjOZ0",
+             authDomain: "urban-management-platform.firebaseapp.com",
+             projectId: "urban-management-platform",
+             storageBucket: "urban-management-platform.appspot.com",
+             messagingSenderId: "546491864177",
+             appId: "1:546491864177:web:8c330c7f7b944a5fd337d0",
+             measurementId:"G-CEVE67J0ZC"
          };
- 
-         
+
          firebase.initializeApp(firebaseConfig);
          const db = firebase.firestore();
- 
+
          const loginView = document.getElementById('login-view');
          const dashboardView = document.getElementById('dashboard-view');
          const departmentSelectionView = document.getElementById('department-selection-view');
          const grievanceListView = document.getElementById('grievance-list-view');
- 
+
          const loginForm = document.getElementById('login-form');
          const loginError = document.getElementById('login-error');
          const logoutButton = document.getElementById('logout-button');
@@ -126,22 +126,22 @@
          const grievanceListContainer = document.getElementById('grievance-list-container');
          const grievanceListTitle = document.getElementById('grievance-list-title');
          const loadingSpinner = document.getElementById('loading-spinner');
- 
+
          let unsubscribeFromGrievances = null;
- 
+
          function showView(viewToShow) {
              loginView.classList.add('hidden');
              dashboardView.classList.add('hidden');
              departmentSelectionView.classList.add('hidden');
              grievanceListView.classList.add('hidden');
- 
+
              document.getElementById(viewToShow).classList.remove('hidden');
- 
+
              if (viewToShow.startsWith('department-') || viewToShow.startsWith('grievance-')) {
                  dashboardView.classList.remove('hidden');
              }
          }
- 
+
          const loggedInUserEmail = sessionStorage.getItem('loggedInUserEmail');
          if (loggedInUserEmail) {
              welcomeMessage.textContent = `Welcome, ${loggedInUserEmail}`;
@@ -149,37 +149,32 @@
          } else {
              showView('login-view');
          }
- 
+
          loginForm.addEventListener('submit', (e) => {
              e.preventDefault();
              const email = document.getElementById('UserID').value;
              const password = document.getElementById('login-password').value;
              loginError.classList.add('hidden');
- 
- 
+
              db.collection("officials")
                  .where("UserID", "==", email)
                  .limit(1)
                  .get()
                  .then((querySnapshot) => {
                      if (querySnapshot.empty) {
-                         
                          loginError.textContent = "Error: Invalid email or password.";
                          loginError.classList.remove('hidden');
                          return;
                      }
- 
+
                      const userDoc = querySnapshot.docs[0];
                      const userData = userDoc.data();
- 
-                     
+
                      if (userData.password === password) {
-                         
                          sessionStorage.setItem('loggedInUserEmail', email);
                          welcomeMessage.textContent = `Welcome, ${email}`;
                          showView('department-selection-view');
                      } else {
-                         
                          loginError.textContent = "Error: Invalid email or password.";
                          loginError.classList.remove('hidden');
                      }
@@ -190,7 +185,7 @@
                      loginError.classList.remove('hidden');
                  });
          });
- 
+
          logoutButton.addEventListener('click', () => {
              sessionStorage.removeItem('loggedInUserEmail');
              if (unsubscribeFromGrievances) {
@@ -198,15 +193,14 @@
              }
              showView('login-view');
          });
- 
-         
+
          window.showDepartmentSelection = () => {
              if (unsubscribeFromGrievances) {
                  unsubscribeFromGrievances();
              }
              showView('department-selection-view');
          }
- 
+
          window.showDepartmentGrievances = (departmentName) => {
              showView('grievance-list-view');
              grievanceListTitle.textContent = `Grievances for ${departmentName}`;
@@ -217,11 +211,11 @@
              const q = grievancesRef
                  .where("department", "==", departmentName)
                  .orderBy("timestamp", "desc");
- 
+
              unsubscribeFromGrievances = q.onSnapshot((querySnapshot) => {
                  loadingSpinner.classList.add('hidden');
-                 grievanceListContainer.innerHTML = ''; 
- 
+                 grievanceListContainer.innerHTML = '';
+
                  if (querySnapshot.empty) {
                      grievanceListContainer.innerHTML = '<p class="text-gray-500 text-center">No grievances found for this department.</p>';
                      return;
@@ -229,14 +223,14 @@
                  querySnapshot.forEach((doc) => {
                      renderGrievanceCard(doc.id, doc.data());
                  });
- 
+
              }, (error) => {
                  console.error("Error fetching grievances: ", error);
                  loadingSpinner.classList.add('hidden');
                  grievanceListContainer.innerHTML = '<p class="text-red-500 text-center">Error: Could not load data. See console for details (check your Firestore indexes and security rules).</p>';
              });
          }
- 
+
          function renderGrievanceCard(docId, data) {
              const card = document.createElement('div');
              card.className = 'p-4 bg-white rounded-lg shadow-md';
@@ -244,7 +238,7 @@
              let statusColor = 'bg-blue-100 text-blue-800';
              if (data.status === 'In Progress') statusColor = 'bg-yellow-100 text-yellow-800';
              else if (data.status === 'Resolved') statusColor = 'bg-green-100 text-green-800';
- 
+
              card.innerHTML = `
                  <div class="flex justify-between items-center">
                      <h3 class="text-lg font-semibold">${data.title || 'No Title'}</h3>
@@ -261,15 +255,15 @@
              `;
              grievanceListContainer.appendChild(card);
          }
-         
+
          window.updateStatus = (docId, newStatus) => {
              const grievanceDocRef = db.collection("grievances").doc(docId);
-             
+
              grievanceDocRef.update({
                  status: newStatus
              })
              .then(() => {
-                 
+
              })
              .catch((error) => {
                  console.error("Error updating status: ", error);
@@ -277,5 +271,5 @@
              });
          }
      </script>
- </body>
- </html>
+</body>
+</html>
