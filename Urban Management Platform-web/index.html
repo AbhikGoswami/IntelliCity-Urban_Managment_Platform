@@ -53,6 +53,24 @@
              transform: translateY(-5px);
              box-shadow: 0 0 25px rgba(102, 126, 234, 0.4);
          }
+
+         @keyframes pulse-glow {
+             0%, 100% { box-shadow: 0 0 20px rgba(102, 126, 234, 0.5); }
+             50% { box-shadow: 0 0 30px rgba(102, 126, 234, 0.8); }
+         }
+
+         .pulse-glow {
+             animation: pulse-glow 2s ease-in-out infinite;
+         }
+
+         @keyframes countUp {
+             from { opacity: 0; transform: translateY(10px); }
+             to { opacity: 1; transform: translateY(0); }
+         }
+
+         .count-animation {
+             animation: countUp 0.5s ease-out;
+         }
      </style>
 </head>
 <body class="min-h-screen">
@@ -141,13 +159,79 @@
 
          <main class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8 relative z-10">
              <div id="department-selection-view">
+                 <!-- Statistics Dashboard -->
+                 <div class="mb-8">
+                     <h2 class="text-3xl font-bold text-white neon-text mb-6">Grievance Overview</h2>
+                     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+                         <!-- Total Grievances -->
+                         <div class="glass-effect rounded-xl p-6 pulse-glow">
+                             <div class="flex items-center justify-between">
+                                 <div>
+                                     <p class="text-blue-200 text-sm font-medium mb-1">Total Grievances</p>
+                                     <h3 id="total-count" class="text-4xl font-bold text-white count-animation">0</h3>
+                                 </div>
+                                 <div class="w-14 h-14 bg-gradient-to-r from-blue-400 to-cyan-500 rounded-xl flex items-center justify-center">
+                                     <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                                     </svg>
+                                 </div>
+                             </div>
+                         </div>
+
+                         <!-- Submitted -->
+                         <div class="glass-effect rounded-xl p-6 glow-effect">
+                             <div class="flex items-center justify-between">
+                                 <div>
+                                     <p class="text-blue-200 text-sm font-medium mb-1">Submitted</p>
+                                     <h3 id="submitted-count" class="text-4xl font-bold text-white count-animation">0</h3>
+                                 </div>
+                                 <div class="w-14 h-14 bg-gradient-to-r from-purple-400 to-pink-500 rounded-xl flex items-center justify-center">
+                                     <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                                     </svg>
+                                 </div>
+                             </div>
+                         </div>
+
+                         <!-- In Progress -->
+                         <div class="glass-effect rounded-xl p-6 glow-effect">
+                             <div class="flex items-center justify-between">
+                                 <div>
+                                     <p class="text-blue-200 text-sm font-medium mb-1">In Progress</p>
+                                     <h3 id="progress-count" class="text-4xl font-bold text-white count-animation">0</h3>
+                                 </div>
+                                 <div class="w-14 h-14 bg-gradient-to-r from-yellow-400 to-orange-500 rounded-xl flex items-center justify-center">
+                                     <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/>
+                                     </svg>
+                                 </div>
+                             </div>
+                         </div>
+
+                         <!-- Resolved -->
+                         <div class="glass-effect rounded-xl p-6 glow-effect">
+                             <div class="flex items-center justify-between">
+                                 <div>
+                                     <p class="text-blue-200 text-sm font-medium mb-1">Resolved</p>
+                                     <h3 id="resolved-count" class="text-4xl font-bold text-white count-animation">0</h3>
+                                 </div>
+                                 <div class="w-14 h-14 bg-gradient-to-r from-green-400 to-emerald-500 rounded-xl flex items-center justify-center">
+                                     <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                                     </svg>
+                                 </div>
+                             </div>
+                         </div>
+                     </div>
+                 </div>
+
                  <h2 class="text-3xl font-bold text-white neon-text mb-6">Select a Department</h2>
                  <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                      <div onclick="showDepartmentGrievances('Electricity')"
                          class="p-6 glass-effect rounded-xl shadow-lg cursor-pointer card-hover">
                          <div class="flex items-center gap-3">
                              <div class="w-12 h-12 bg-gradient-to-r from-yellow-400 to-orange-500 rounded-lg flex items-center justify-center">
-                                 <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/>
                                  </svg>
                              </div>
@@ -260,6 +344,7 @@
          const loadingSpinner = document.getElementById('loading-spinner');
 
          let unsubscribeFromGrievances = null;
+         let unsubscribeFromStats = null;
 
          function showView(viewToShow) {
              loginView.classList.add('hidden');
@@ -272,6 +357,37 @@
              if (viewToShow.startsWith('department-') || viewToShow.startsWith('grievance-')) {
                  dashboardView.classList.remove('hidden');
              }
+         }
+
+         // Load statistics
+         function loadStatistics() {
+             if (unsubscribeFromStats) {
+                 unsubscribeFromStats();
+             }
+
+             unsubscribeFromStats = db.collection("grievances").onSnapshot((snapshot) => {
+                 let total = 0;
+                 let submitted = 0;
+                 let inProgress = 0;
+                 let resolved = 0;
+
+                 snapshot.forEach((doc) => {
+                     total++;
+                     const status = doc.data().status;
+                     if (status === 'Submitted' || !status) {
+                         submitted++;
+                     } else if (status === 'In Progress') {
+                         inProgress++;
+                     } else if (status === 'Resolved') {
+                         resolved++;
+                     }
+                 });
+
+                 document.getElementById('total-count').textContent = total;
+                 document.getElementById('submitted-count').textContent = submitted;
+                 document.getElementById('progress-count').textContent = inProgress;
+                 document.getElementById('resolved-count').textContent = resolved;
+             });
          }
 
          const togglePasswordButton = document.getElementById('toggle-password');
@@ -295,6 +411,7 @@
          if (loggedInUserEmail) {
              welcomeMessage.textContent = `Welcome, ${loggedInUserEmail}`;
              showView('department-selection-view');
+             loadStatistics();
          } else {
              showView('login-view');
          }
@@ -323,6 +440,7 @@
                          sessionStorage.setItem('loggedInUserEmail', email);
                          welcomeMessage.textContent = `Welcome, ${email}`;
                          showView('department-selection-view');
+                         loadStatistics();
                      } else {
                          loginError.textContent = "Invalid credentials";
                          loginError.classList.remove('hidden');
@@ -339,6 +457,9 @@
              sessionStorage.removeItem('loggedInUserEmail');
              if (unsubscribeFromGrievances) {
                  unsubscribeFromGrievances();
+             }
+             if (unsubscribeFromStats) {
+                 unsubscribeFromStats();
              }
              showView('login-view');
          });
