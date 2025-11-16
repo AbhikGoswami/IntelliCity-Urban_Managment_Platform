@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -12,20 +13,34 @@
             100% { background-position: 0% 50%; }
         }
         
+        .login-gradient-bg {
+            background: linear-gradient(135deg, #1e3a8a 0%, #312e81 50%, #1e293b 100%);
+        }
+        
         .gradient-bg {
-            background: linear-gradient(-45deg, #667eea 0%, #764ba2 25%, #f093fb 50%, #4facfe 75%, #00f2fe 100%);
+            background: linear-gradient(-45deg, #1e3a8a 0%, #1e40af 25%, #2563eb 50%, #3b82f6 75%, #60a5fa 100%);
             background-size: 400% 400%;
             animation: gradient 15s ease infinite;
         }
         
+        .login-glass-effect {
+            background: rgba(30, 58, 138, 0.25);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(59, 130, 246, 0.4);
+        }
+        
         .glass-effect {
-            background: rgba(255, 255, 255, 0.1);
+            background: rgba(30, 58, 138, 0.15);
             backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.2);
+            border: 1px solid rgba(59, 130, 246, 0.3);
+        }
+        
+        .login-glow-effect {
+            box-shadow: 0 8px 32px rgba(30, 58, 138, 0.4);
         }
         
         .glow-effect {
-            box-shadow: 0 0 20px rgba(102, 126, 234, 0.5);
+            box-shadow: 0 0 20px rgba(59, 130, 246, 0.3);
         }
         
         @keyframes float {
@@ -38,11 +53,11 @@
         }
         
         .neon-text {
-            text-shadow: 0 0 10px rgba(102, 126, 234, 0.8), 0 0 20px rgba(102, 126, 234, 0.6), 0 0 30px rgba(102, 126, 234, 0.4);
+            text-shadow: 0 0 10px rgba(59, 130, 246, 0.6), 0 0 20px rgba(59, 130, 246, 0.4);
         }
         
         .input-glow:focus {
-            box-shadow: 0 0 15px rgba(102, 126, 234, 0.6);
+            box-shadow: 0 0 15px rgba(59, 130, 246, 0.5);
         }
 
         .card-hover {
@@ -51,12 +66,12 @@
 
         .card-hover:hover {
             transform: translateY(-5px);
-            box-shadow: 0 0 25px rgba(102, 126, 234, 0.4);
+            box-shadow: 0 0 25px rgba(59, 130, 246, 0.4);
         }
 
         @keyframes pulse-glow {
-            0%, 100% { box-shadow: 0 0 20px rgba(102, 126, 234, 0.5); }
-            50% { box-shadow: 0 0 30px rgba(102, 126, 234, 0.8); }
+            0%, 100% { box-shadow: 0 0 20px rgba(59, 130, 246, 0.3); }
+            50% { box-shadow: 0 0 30px rgba(59, 130, 246, 0.6); }
         }
 
         .pulse-glow {
@@ -75,15 +90,15 @@
 </head>
 <body class="min-h-screen">
 
-    <div id="login-view" class="gradient-bg flex items-center justify-center min-h-screen relative overflow-hidden">
-        <div class="absolute top-20 left-20 w-72 h-72 bg-purple-500 rounded-full mix-blend-multiply filter blur-xl opacity-20 floating"></div>
-        <div class="absolute top-40 right-20 w-72 h-72 bg-blue-500 rounded-full mix-blend-multiply filter blur-xl opacity-20 floating" style="animation-delay: 2s;"></div>
-        <div class="absolute bottom-20 left-1/2 w-72 h-72 bg-pink-500 rounded-full mix-blend-multiply filter blur-xl opacity-20 floating" style="animation-delay: 4s;"></div>
+    <div id="login-view" class="login-gradient-bg flex items-center justify-center min-h-screen relative overflow-hidden">
+        <div class="absolute top-20 left-20 w-72 h-72 bg-blue-800 rounded-full mix-blend-multiply filter blur-xl opacity-20 floating"></div>
+        <div class="absolute top-40 right-20 w-72 h-72 bg-indigo-800 rounded-full mix-blend-multiply filter blur-xl opacity-20 floating" style="animation-delay: 2s;"></div>
+        <div class="absolute bottom-20 left-1/2 w-72 h-72 bg-slate-700 rounded-full mix-blend-multiply filter blur-xl opacity-20 floating" style="animation-delay: 4s;"></div>
         
-        <div class="w-full max-w-md p-8 space-y-6 glass-effect rounded-2xl shadow-2xl glow-effect relative z-10">
+        <div class="w-full max-w-md p-8 space-y-6 login-glass-effect rounded-2xl shadow-2xl login-glow-effect relative z-10">
             <div class="text-center">
                 <h2 class="text-4xl font-bold text-white neon-text mb-2">Civic Management</h2>
-                <p class="text-blue-100 text-sm">Official Portal Login</p>
+                <p class="text-blue-200 text-sm">Official Portal Login</p>
             </div>
             
             <form id="login-form" class="space-y-6 mt-8">
@@ -95,7 +110,7 @@
                         Username
                     </label>
                     <input id="UserID" type="text" required
-                        class="w-full px-4 py-3 mt-2 text-white bg-white bg-opacity-20 border border-white border-opacity-30 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-transparent placeholder-blue-200 input-glow transition-all"
+                        class="w-full px-4 py-3 mt-2 text-white bg-white bg-opacity-10 border border-blue-400 border-opacity-40 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-transparent placeholder-blue-300 input-glow transition-all"
                         placeholder="official@city.gov">
                 </div>
                 <div>
@@ -107,9 +122,9 @@
                     </label>
                     <div class="relative mt-2">
                         <input id="login-password" type="password" required
-                            class="w-full px-4 py-3 pr-12 text-white bg-white bg-opacity-20 border border-white border-opacity-30 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-transparent placeholder-blue-200 input-glow transition-all"
+                            class="w-full px-4 py-3 pr-12 text-white bg-white bg-opacity-10 border border-blue-400 border-opacity-40 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-transparent placeholder-blue-300 input-glow transition-all"
                             placeholder="••••••••">
-                        <button type="button" id="toggle-password" class="absolute right-4 top-1/2 transform -translate-y-1/2 text-blue-200 hover:text-white focus:outline-none transition-colors">
+                        <button type="button" id="toggle-password" class="absolute right-4 top-1/2 transform -translate-y-1/2 text-blue-300 hover:text-white focus:outline-none transition-colors">
                             <svg id="eye-icon" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
@@ -122,7 +137,7 @@
                 </div>
                 <p id="login-error" class="text-sm text-red-300 bg-red-500 bg-opacity-20 px-4 py-2 rounded-lg hidden"></p>
                 <button type="submit"
-                    class="w-full py-3 px-4 font-semibold text-white bg-gradient-to-r from-blue-500 to-purple-600 rounded-xl shadow-lg hover:from-blue-600 hover:to-purple-700 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:ring-offset-2 focus:ring-offset-transparent transform hover:scale-105 transition-all glow-effect">
+                    class="w-full py-3 px-4 font-semibold text-white bg-gradient-to-r from-blue-600 to-indigo-700 rounded-xl shadow-lg hover:from-blue-700 hover:to-indigo-800 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:ring-offset-2 focus:ring-offset-transparent transform hover:scale-105 transition-all login-glow-effect">
                     <span class="flex items-center justify-center gap-2">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1"/>
