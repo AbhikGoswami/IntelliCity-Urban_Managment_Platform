@@ -477,13 +477,12 @@
 
             unsubscribeFromGrievances = q.onSnapshot((querySnapshot) => {
                 loadingSpinner.classList.add('hidden');
-                grievanceListContainer.innerHTML = ''; 
+                grievanceListContainer.innerHTML = ''; // Clear list for real-time updates
 
                 if (querySnapshot.empty) {
                     grievanceListContainer.innerHTML = '<p class="text-white text-center glass-effect p-6 rounded-xl">No grievances found for this department.</p>';
                     return;
                 }
-                
                 
                 const promises = [];
 
@@ -492,33 +491,27 @@
                     const grievanceData = doc.data();
                     
                     if (grievanceData.userId) {
-                        
                         const userPromise = db.collection("users").doc(grievanceData.userId).get()
                             .then(userDoc => {
                                 let userName = "Unknown User";
                                 if (userDoc.exists) {
                                     userName = userDoc.data().name; 
                                 }
-                                
                                 return { grievanceId, grievanceData, userName };
                             })
                             .catch(err => {
                                 console.error("Error fetching user: ", err);
-                                
                                 return { grievanceId, grievanceData, userName: "Unknown User" };
                             });
                         promises.push(userPromise);
                     } else {
-                        
                         promises.push(Promise.resolve({ grievanceId, grievanceData, userName: "N/A" }));
                     }
                 });
 
                 Promise.all(promises)
                     .then(results => {
-                        
                         grievanceListContainer.innerHTML = '';
-                        
                         results.forEach(result => {
                             renderGrievanceCard(result.grievanceId, result.grievanceData, result.userName);
                         });
@@ -533,13 +526,44 @@
 
         function renderGrievanceCard(docId, data, userName) { 
             const card = document.createElement('div');
+            // --- LOGIC MERGED ---
+            // Add ID to the card element so deleteGrievance can find it
+            card.id = `card-${docId}`;
             card.className = 'p-6 glass-effect rounded-xl shadow-lg glow-effect';
+            
             const date = data.timestamp ? data.timestamp.toDate().toLocaleString() : 'N/A';
+            
             let statusColor = 'bg-blue-500 bg-opacity-80 text-white';
             if (data.status === 'In Progress') statusColor = 'bg-yellow-500 bg-opacity-80 text-white';
             else if (data.status === 'Resolved') statusColor = 'bg-green-500 bg-opacity-80 text-white';
 
             const reportedByHtml = `<p class="text-sm text-blue-200 mt-4">Reported by: <span class="font-medium text-white">${userName}</span></p>`;
+
+            // --- LOGIC MERGED: Button rendering logic from Code 2 ---
+            let inProgressButtonHtml = '';
+            let resolvedButtonHtml = '';
+            let deleteButtonHtml = '';
+
+            // Define styles for active and disabled buttons
+            const inProgressActive = `class="px-4 py-2 text-sm font-medium text-white bg-gradient-to-r from-yellow-500 to-orange-500 rounded-lg hover:from-yellow-600 hover:to-orange-600 transition-all transform hover:scale-105 glow-effect"`;
+            const resolvedActive = `class="px-4 py-2 text-sm font-medium text-white bg-gradient-to-r from-green-500 to-emerald-500 rounded-lg hover:from-green-600 hover:to-emerald-600 transition-all transform hover:scale-105 glow-effect"`;
+            const deleteActive = `class="px-4 py-2 text-sm font-medium text-white bg-gradient-to-r from-red-500 to-pink-500 rounded-lg hover:from-red-600 hover:to-pink-600 transition-all transform hover:scale-105 glow-effect"`;
+
+            const inProgressDisabled = `class="px-4 py-2 text-sm font-medium text-white bg-gradient-to-r from-yellow-500 to-orange-500 rounded-lg opacity-50 cursor-not-allowed glow-effect"`;
+            const resolvedDisabled = `class="px-4 py-2 text-sm font-medium text-white bg-gradient-to-r from-green-500 to-emerald-500 rounded-lg opacity-50 cursor-not-allowed glow-effect"`;
+
+            if (data.status === 'Submitted') {
+                inProgressButtonHtml = `<button onclick="updateStatus('${docId}', 'In Progress')" ${inProgressActive}>Mark as In Progress</button>`;
+                resolvedButtonHtml = `<button onclick="updateStatus('${docId}', 'Resolved')" ${resolvedActive}>Mark as Resolved</button>`;
+            } else if (data.status === 'In Progress') {
+                inProgressButtonHtml = `<button disabled ${inProgressDisabled}>In Progress</button>`;
+                resolvedButtonHtml = `<button onclick="updateStatus('${docId}', 'Resolved')" ${resolvedActive}>Mark as Resolved</button>`;
+            } else if (data.status === 'Resolved') {
+                inProgressButtonHtml = `<button disabled ${inProgressDisabled}>In Progress</button>`;
+                resolvedButtonHtml = `<button disabled ${resolvedDisabled}>Resolved</button>`;
+                deleteButtonHtml = `<button onclick="deleteGrievance('${docId}')" ${deleteActive}>Delete</button>`;
+            }
+            // --- END OF MERGED LOGIC ---
 
             card.innerHTML = `
                 <div class="flex justify-between items-center">
@@ -547,11 +571,14 @@
                     <span class="px-4 py-2 text-xs font-bold ${statusColor} rounded-full">${data.status || 'Submitted'}</span>
                 </div>
                 <p class="text-blue-100 mt-3">${data.description}</p>
-                ${reportedByHtml} <p class="text-sm text-blue-200 mt-1">Reported on: <span class="font-medium text-white">${date}</span></p>
+                ${reportedByHtml} 
+                <p class="text-sm text-blue-200 mt-1">Reported on: <span class="font-medium text-white">${date}</span></p>
                 ${data.imageUrl ? `<img src="${data.imageUrl}" alt="Grievance Image" class="mt-4 rounded-xl max-h-60 cursor-pointer border-2 border-white border-opacity-30 glow-effect" onclick="window.open('${data.imageUrl}', '_blank')">` : ''}
+                
                 <div class="mt-6 pt-4 border-t border-white border-opacity-20 space-x-2">
-                    <button onclick="updateStatus('${docId}', 'In Progress')" class="px-4 py-2 text-sm font-medium text-white bg-gradient-to-r from-yellow-500 to-orange-500 rounded-lg hover:from-yellow-600 hover:to-orange-600 transition-all transform hover:scale-105 glow-effect">Mark as In Progress</button>
-                    <button onclick="updateStatus('${docId}', 'Resolved')" class="px-4 py-2 text-sm font-medium text-white bg-gradient-to-r from-green-500 to-emerald-500 rounded-lg hover:from-green-600 hover:to-emerald-600 transition-all transform hover:scale-105 glow-effect">Mark as Resolved</button>
+                    ${inProgressButtonHtml}
+                    ${resolvedButtonHtml}
+                    ${deleteButtonHtml}
                 </div>
             `;
             grievanceListContainer.appendChild(card);
@@ -564,11 +591,41 @@
                 status: newStatus
             })
             .then(() => {
-
+                // onSnapshot will handle the UI update
             })
             .catch((error) => {
                 console.error("Error updating status: ", error);
                 alert("Could not update status. See console for details.");
+            });
+        }
+
+        // --- LOGIC MERGED: Added deleteGrievance function ---
+        window.deleteGrievance = (docId) => {
+            if (!confirm("Are you sure you want to delete this grievance? This action cannot be undone.")) {
+                return;
+            }
+
+            // Optimistically remove from UI
+            const cardToRemove = document.getElementById(`card-${docId}`);
+            if (cardToRemove) {
+                cardToRemove.remove();
+            }
+            
+            const grievanceDocRef = db.collection("grievances").doc(docId);
+            
+            grievanceDocRef.delete()
+            .then(() => {
+                // Successfully deleted from Firestore
+                // Check if the container is now empty
+                if (grievanceListContainer.children.length === 0) {
+                    grievanceListContainer.innerHTML = '<p class="text-white text-center glass-effect p-6 rounded-xl">No grievances found for this department.</p>';
+                }
+            })
+            .catch((error) => {
+                console.error("Error deleting document: ", error);
+                alert("Failed to delete. The grievance may reappear on refresh.");
+                // If delete fails, you might want to refresh the list, 
+                // but since we use onSnapshot, it might just reappear.
             });
         }
     </script>
