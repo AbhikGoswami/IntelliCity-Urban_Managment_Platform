@@ -527,8 +527,6 @@
 
         function renderGrievanceCard(docId, data, userName) { 
             const card = document.createElement('div');
-            // --- LOGIC MERGED ---
-            // Add ID to the card element so deleteGrievance can find it
             card.id = `card-${docId}`;
             card.className = 'p-6 glass-effect rounded-xl shadow-lg glow-effect';
             
@@ -540,12 +538,10 @@
 
             const reportedByHtml = `<p class="text-sm text-blue-200 mt-4">Reported by: <span class="font-medium text-white">${userName}</span></p>`;
 
-            // --- LOGIC MERGED: Button rendering logic from Code 2 ---
             let inProgressButtonHtml = '';
             let resolvedButtonHtml = '';
             let deleteButtonHtml = '';
 
-            // Define styles for active and disabled buttons
             const inProgressActive = `class="px-4 py-2 text-sm font-medium text-white bg-gradient-to-r from-yellow-500 to-orange-500 rounded-lg hover:from-yellow-600 hover:to-orange-600 transition-all transform hover:scale-105 glow-effect"`;
             const resolvedActive = `class="px-4 py-2 text-sm font-medium text-white bg-gradient-to-r from-green-500 to-emerald-500 rounded-lg hover:from-green-600 hover:to-emerald-600 transition-all transform hover:scale-105 glow-effect"`;
             const deleteActive = `class="px-4 py-2 text-sm font-medium text-white bg-gradient-to-r from-red-500 to-pink-500 rounded-lg hover:from-red-600 hover:to-pink-600 transition-all transform hover:scale-105 glow-effect"`;
@@ -564,7 +560,6 @@
                 resolvedButtonHtml = `<button disabled ${resolvedDisabled}>Resolved</button>`;
                 deleteButtonHtml = `<button onclick="deleteGrievance('${docId}')" ${deleteActive}>Delete</button>`;
             }
-            // --- END OF MERGED LOGIC ---
 
             card.innerHTML = `
                 <div class="flex justify-between items-center">
@@ -592,21 +587,19 @@
                 status: newStatus
             })
             .then(() => {
-                // onSnapshot will handle the UI update
+               
             })
             .catch((error) => {
                 console.error("Error updating status: ", error);
                 alert("Could not update status. See console for details.");
             });
         }
-
-        // --- LOGIC MERGED: Added deleteGrievance function ---
+         
         window.deleteGrievance = (docId) => {
             if (!confirm("Are you sure you want to delete this grievance? This action cannot be undone.")) {
                 return;
             }
 
-            // Optimistically remove from UI
             const cardToRemove = document.getElementById(`card-${docId}`);
             if (cardToRemove) {
                 cardToRemove.remove();
@@ -616,8 +609,6 @@
             
             grievanceDocRef.delete()
             .then(() => {
-                // Successfully deleted from Firestore
-                // Check if the container is now empty
                 if (grievanceListContainer.children.length === 0) {
                     grievanceListContainer.innerHTML = '<p class="text-white text-center glass-effect p-6 rounded-xl">No grievances found for this department.</p>';
                 }
@@ -625,10 +616,10 @@
             .catch((error) => {
                 console.error("Error deleting document: ", error);
                 alert("Failed to delete. The grievance may reappear on refresh.");
-                // If delete fails, you might want to refresh the list, 
-                // but since we use onSnapshot, it might just reappear.
+                
             });
         }
     </script>
 </body>
 </html>
+
