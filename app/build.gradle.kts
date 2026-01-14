@@ -122,6 +122,9 @@ dependencies {
     implementation("androidx.appcompat:appcompat:1.7.0")
     implementation("com.google.android.material:material:1.12.0")
     implementation("androidx.constraintlayout:constraintlayout:2.1.4")
+    implementation(libs.androidx.activity)
+    //implementation(libs.firebase.messaging.ktx)
+    implementation(libs.firebase.messaging)
 
     testImplementation("junit:junit:4.13.2")
     androidTestImplementation("androidx.test.ext:junit:1.1.5")
@@ -142,6 +145,24 @@ dependencies {
 
     // For loading images from URLs
     implementation("com.github.bumptech.glide:glide:4.16.0")
+
+
+    //OlaMap SDK
+    implementation(files("libs/OlaMapSdk-1.0.0.aar"))
+
+    //Maplibre
+    implementation ("org.maplibre.gl:android-sdk:10.0.2")
+    implementation ("org.maplibre.gl:android-plugin-annotation-v9:1.0.0")
+    implementation ("org.maplibre.gl:android-plugin-markerview-v9:1.0.0")
+
+    implementation(files("libs/Places-sdk-2.3.9.jar"))
+
+    implementation("com.squareup.retrofit2:converter-gson:2.11.0")
+    implementation("com.squareup.retrofit2:retrofit:2.11.0")
+
+    implementation ("com.airbnb.android:lottie:6.1.0")
+
+    //(libs.google.firebase.messaging.ktx)
 }
 
 

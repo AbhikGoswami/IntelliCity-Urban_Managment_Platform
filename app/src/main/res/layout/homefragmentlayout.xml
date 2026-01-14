@@ -12,35 +12,78 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Announcements"
-            android:textSize="24sp"
+            android:textSize="22sp"
             android:textStyle="bold"
-            android:textColor="@color/black"/>
+            android:textColor="@color/black"
+            android:layout_marginBottom="12dp"/>
 
-        <TextView
+        <LinearLayout
+            android:id="@+id/layout_latest_announcement"
             android:layout_width="match_parent"
-            android:layout_height="100dp"
-            android:text="[Announcements will be listed here]"
-            android:gravity="center"
-            android:layout_marginTop="8dp"
-            android:background="#E0E0E0"/>
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:background="@drawable/bg_rounded_gray"
+            android:padding="16dp"
+            android:gravity="center_vertical"
+            android:clickable="true"
+            android:focusable="true">
+
+            <ImageView
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:src="@drawable/ic_notification_bell"
+                android:layout_marginEnd="12dp"
+                android:contentDescription="Icon"/>
+
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:orientation="vertical">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="LATEST UPDATE"
+                    android:textSize="10sp"
+                    android:textColor="#757575"
+                    android:letterSpacing="0.1"
+                    android:textStyle="bold"/>
+
+                <TextView
+                    android:id="@+id/tv_home_ann_title"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Loading updates..."
+                    android:textSize="14sp"
+                    android:textColor="@color/black"
+                    android:maxLines="1"
+                    android:ellipsize="end"
+                    android:textStyle="bold"/>
+            </LinearLayout>
+
+            <ImageView
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:src="@drawable/ic_arrow_right"
+                android:alpha="0.5"/>
+        </LinearLayout>
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Lodge a Grievance"
-            android:textSize="24sp"
+            android:textSize="22sp"
             android:textStyle="bold"
             android:textColor="@color/black"
-            android:layout_marginTop="24dp"
-            android:layout_marginBottom="8dp"/>
+            android:layout_marginTop="32dp"
+            android:layout_marginBottom="16dp"/>
 
-        <!-- This RecyclerView replaces the old placeholder TextView -->
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/rv_departments"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content" />
+            android:layout_height="wrap_content"
+            android:nestedScrollingEnabled="false"/>
 
     </LinearLayout>
-
 </androidx.core.widget.NestedScrollView>
-

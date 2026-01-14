@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.cardview.widget.CardView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginBottom="12dp"
+    android:layout_marginHorizontal="4dp"
+    app:cardCornerRadius="12dp"
+    app:cardElevation="4dp"
+    app:cardBackgroundColor="@android:color/white">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="16dp">
+
+        <TextView
+            android:id="@+id/tv_ann_title"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Announcement Title"
+            android:textSize="18sp"
+            android:textStyle="bold"
+            android:textColor="#1A237E"
+            android:layout_marginBottom="6dp"/>
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:background="#E0E0E0"
+            android:layout_marginBottom="8dp"/>
+
+        <TextView
+            android:id="@+id/tv_ann_content"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="This is the detailed content of the announcement. It serves as the body text."
+            android:textSize="14sp"
+            android:textColor="#424242"
+            android:lineSpacingExtra="4dp"/>
+
+    </LinearLayout>
+</androidx.cardview.widget.CardView>

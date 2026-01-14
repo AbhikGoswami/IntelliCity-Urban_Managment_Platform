@@ -12,6 +12,7 @@ import android.widget.*
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.fragment.app.Fragment
 import com.abhik.urbanmanagementplatform.R
+import com.abhik.urbanmanagementplatform.activities.MapActivity
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.storage.FirebaseStorage
@@ -28,16 +29,34 @@ class GrievanceFormFragment : Fragment() {
 
     private lateinit var titleEditText: EditText
     private lateinit var descriptionEditText: EditText
+    private lateinit var addressEditText: EditText
+    private lateinit var locationButton: Button
     private lateinit var previewImageView: ImageView
     private lateinit var progressBar: ProgressBar
     private lateinit var submitButton: Button
 
-    // Modern way to handle activity results
+    // <<< MODIFICATION 1: 'latitude' is now 'var' to allow updates
+    private var latitude : Double = 0.0
+    private var longitude: Double = 0.0
+
+    // Launcher for picking an image
     private val pickImageLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
         if (result.resultCode == Activity.RESULT_OK) {
             imageUri = result.data?.data
             previewImageView.setImageURI(imageUri)
             previewImageView.visibility = View.VISIBLE
+        }
+    }
+
+    // <<< MODIFICATION 2: Added a launcher to get results from MapActivity
+    private val mapLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+        if (result.resultCode == Activity.RESULT_OK) {
+            // Get the data from the MapActivity's result intent
+            latitude = result.data?.getDoubleExtra("latitude", 0.0) ?: 0.0
+            longitude = result.data?.getDoubleExtra("longitude", 0.0) ?: 0.0
+
+            // Show the user that the location was set
+            Toast.makeText(context, "Location set successfully!", Toast.LENGTH_SHORT).show()
         }
     }
 
@@ -58,10 +77,11 @@ class GrievanceFormFragment : Fragment() {
         db = FirebaseFirestore.getInstance()
         storage = FirebaseStorage.getInstance()
 
-        // Initialize UI components
         view.findViewById<TextView>(R.id.tv_department_title).text = "File Grievance: $departmentName"
         titleEditText = view.findViewById(R.id.et_grievance_title)
         descriptionEditText = view.findViewById(R.id.et_grievance_description)
+        addressEditText= view.findViewById(R.id.et_address)
+        locationButton= view.findViewById(R.id.btn_upload_location)
         previewImageView = view.findViewById(R.id.iv_preview)
         progressBar = view.findViewById(R.id.progress_bar)
         submitButton = view.findViewById(R.id.btn_submit_grievance)
@@ -70,6 +90,12 @@ class GrievanceFormFragment : Fragment() {
         uploadButton.setOnClickListener {
             val galleryIntent = Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI)
             pickImageLauncher.launch(galleryIntent)
+        }
+
+        // <<< MODIFICATION 3: Changed to use 'mapLauncher.launch()'
+        locationButton.setOnClickListener {
+            val intent = Intent(context, MapActivity::class.java)
+            mapLauncher.launch(intent)
         }
 
         submitButton.setOnClickListener {
@@ -82,18 +108,16 @@ class GrievanceFormFragment : Fragment() {
     private fun submitGrievance() {
         val title = titleEditText.text.toString().trim()
         val description = descriptionEditText.text.toString().trim()
+        val address= addressEditText.text.toString().trim() // Changed to .text.toString()
 
-        if (title.isEmpty() || description.isEmpty()) {
-            Toast.makeText(context, "Title and description cannot be empty.", Toast.LENGTH_SHORT).show()
+        if (title.isEmpty() || description.isEmpty() || address.isEmpty()) {
+            Toast.makeText(context, "These fields cannot be empty.", Toast.LENGTH_SHORT).show()
             return
         }
 
         setLoading(true)
 
         if (imageUri != null) {
-            // If there's an image, upload it first
-            //val fileName = "grievances/${UUID.randomUUID()}.jpg"
-
             val folderName = departmentName.replace(" ", "_").lowercase(Locale.getDefault())
             val fileName = "grievances/$folderName/${UUID.randomUUID()}.jpg"
 
@@ -122,6 +146,17 @@ class GrievanceFormFragment : Fragment() {
             return
         }
 
+        // Create the nested location map
+        // This now uses the 'latitude' and 'longitude' variables updated by the mapLauncher
+        val locationData = if (latitude != 0.0 && longitude != 0.0) { // Check if they are not the default 0.0
+            hashMapOf(
+                "latitude" to latitude,
+                "longitude" to longitude
+            )
+        } else {
+            null // If location isn't set, save null
+        }
+
         val grievance = hashMapOf(
             "userId" to userId,
             "department" to departmentName,
@@ -129,7 +164,8 @@ class GrievanceFormFragment : Fragment() {
             "description" to description,
             "imageUrl" to imageUrl,
             "timestamp" to Date(),
-            "status" to "Submitted" // Initial status
+            "status" to "Submitted", // Initial status
+            "location" to locationData // Add the nested location map
         )
 
         db.collection("grievances")

@@ -3,6 +3,7 @@ package com.abhik.urbanmanagementplatform.activities
 import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.util.Log
 import android.view.MenuItem
 import android.widget.TextView
 import androidx.appcompat.app.ActionBarDrawerToggle
@@ -16,6 +17,7 @@ import com.abhik.urbanmanagementplatform.fragments.TrackGrievancesFragment
 import com.google.android.material.navigation.NavigationView
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.messaging.FirebaseMessaging
 
 class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelectedListener {
 
@@ -29,6 +31,11 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
 
         auth = FirebaseAuth.getInstance()
         db = FirebaseFirestore.getInstance()
+
+        FirebaseMessaging.getInstance().subscribeToTopic("all_users")
+            .addOnCompleteListener { task ->
+                if (task.isSuccessful) Log.d("FCM", "Subscribed to announcements!")
+            }
 
         val toolbar: Toolbar = findViewById(R.id.toolbar)
         setSupportActionBar(toolbar)
