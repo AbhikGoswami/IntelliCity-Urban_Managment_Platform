@@ -7,6 +7,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
 import android.widget.EditText
+import android.widget.ProgressBar
 import android.widget.TextView
 import android.widget.Toast
 import androidx.fragment.app.Fragment
@@ -31,6 +32,9 @@ class LoginFragment : Fragment() {
         val btnLogin = view.findViewById<Button>(R.id.btnLogin)
         val tvSwitchToRegister = view.findViewById<TextView>(R.id.tvSwitchToRegister)
 
+        val progressBar = view.findViewById<ProgressBar>(R.id.progress_bar_login)
+        progressBar.visibility = View.GONE
+
         btnLogin.setOnClickListener {
             val email = etEmail.text.toString().trim()
             val password = etPassword.text.toString().trim()
@@ -40,10 +44,15 @@ class LoginFragment : Fragment() {
                 return@setOnClickListener
             }
 
+            progressBar.visibility = View.VISIBLE
+            btnLogin.isEnabled = false
+
             auth.signInWithEmailAndPassword(email, password)
                 .addOnCompleteListener { task ->
+                    progressBar.visibility = View.GONE
+                    btnLogin.isEnabled = true
+
                     if (task.isSuccessful) {
-                        // Navigate to MainActivity
                         val intent = Intent(activity, MainActivity::class.java)
                         startActivity(intent)
                         activity?.finish()
