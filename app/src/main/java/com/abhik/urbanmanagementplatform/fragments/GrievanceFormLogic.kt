@@ -35,11 +35,9 @@ class GrievanceFormFragment : Fragment() {
     private lateinit var progressBar: ProgressBar
     private lateinit var submitButton: Button
 
-    // <<< MODIFICATION 1: 'latitude' is now 'var' to allow updates
     private var latitude : Double = 0.0
     private var longitude: Double = 0.0
 
-    // Launcher for picking an image
     private val pickImageLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
         if (result.resultCode == Activity.RESULT_OK) {
             imageUri = result.data?.data
@@ -48,14 +46,10 @@ class GrievanceFormFragment : Fragment() {
         }
     }
 
-    // <<< MODIFICATION 2: Added a launcher to get results from MapActivity
     private val mapLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
         if (result.resultCode == Activity.RESULT_OK) {
-            // Get the data from the MapActivity's result intent
             latitude = result.data?.getDoubleExtra("latitude", 0.0) ?: 0.0
             longitude = result.data?.getDoubleExtra("longitude", 0.0) ?: 0.0
-
-            // Show the user that the location was set
             Toast.makeText(context, "Location set successfully!", Toast.LENGTH_SHORT).show()
         }
     }
@@ -92,7 +86,6 @@ class GrievanceFormFragment : Fragment() {
             pickImageLauncher.launch(galleryIntent)
         }
 
-        // <<< MODIFICATION 3: Changed to use 'mapLauncher.launch()'
         locationButton.setOnClickListener {
             val intent = Intent(context, MapActivity::class.java)
             mapLauncher.launch(intent)
@@ -108,7 +101,7 @@ class GrievanceFormFragment : Fragment() {
     private fun submitGrievance() {
         val title = titleEditText.text.toString().trim()
         val description = descriptionEditText.text.toString().trim()
-        val address= addressEditText.text.toString().trim() // Changed to .text.toString()
+        val address= addressEditText.text.toString().trim()
 
         if (title.isEmpty() || description.isEmpty() || address.isEmpty()) {
             Toast.makeText(context, "These fields cannot be empty.", Toast.LENGTH_SHORT).show()
@@ -133,7 +126,6 @@ class GrievanceFormFragment : Fragment() {
                     setLoading(false)
                 }
         } else {
-            // If no image, save directly to Firestore
             saveGrievanceToFirestore(title, description, null)
         }
     }
@@ -146,38 +138,46 @@ class GrievanceFormFragment : Fragment() {
             return
         }
 
-        // Create the nested location map
-        // This now uses the 'latitude' and 'longitude' variables updated by the mapLauncher
-        val locationData = if (latitude != 0.0 && longitude != 0.0) { // Check if they are not the default 0.0
-            hashMapOf(
-                "latitude" to latitude,
-                "longitude" to longitude
-            )
-        } else {
-            null // If location isn't set, save null
-        }
+        db.collection("users").document(userId).get()
+            .addOnSuccessListener { documentSnapshot ->
 
-        val grievance = hashMapOf(
-            "userId" to userId,
-            "department" to departmentName,
-            "title" to title,
-            "description" to description,
-            "imageUrl" to imageUrl,
-            "timestamp" to Date(),
-            "status" to "Submitted", // Initial status
-            "location" to locationData // Add the nested location map
-        )
+                val userName = documentSnapshot.getString("name") ?: "Anonymous"
 
-        db.collection("grievances")
-            .add(grievance)
-            .addOnSuccessListener {
-                Toast.makeText(context, "Grievance submitted successfully!", Toast.LENGTH_SHORT).show()
-                setLoading(false)
-                // Go back to the home screen
-                parentFragmentManager.popBackStack()
+                val locationData = if (latitude != 0.0 && longitude != 0.0) {
+                    hashMapOf(
+                        "latitude" to latitude,
+                        "longitude" to longitude
+                    )
+                } else {
+                    null
+                }
+
+                val grievance = hashMapOf(
+                    "userId" to userId,
+                    "userName" to userName,
+                    "department" to departmentName,
+                    "title" to title,
+                    "description" to description,
+                    "imageUrl" to imageUrl,
+                    "timestamp" to Date(),
+                    "status" to "Submitted",
+                    "location" to locationData
+                )
+
+                db.collection("grievances")
+                    .add(grievance)
+                    .addOnSuccessListener {
+                        Toast.makeText(context, "Grievance submitted successfully!", Toast.LENGTH_SHORT).show()
+                        setLoading(false)
+                        parentFragmentManager.popBackStack()
+                    }
+                    .addOnFailureListener { e ->
+                        Toast.makeText(context, "Failed to submit: ${e.message}", Toast.LENGTH_LONG).show()
+                        setLoading(false)
+                    }
             }
             .addOnFailureListener { e ->
-                Toast.makeText(context, "Failed to submit: ${e.message}", Toast.LENGTH_LONG).show()
+                Toast.makeText(context, "Failed to fetch user profile: ${e.message}", Toast.LENGTH_SHORT).show()
                 setLoading(false)
             }
     }
