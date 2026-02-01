@@ -1,4 +1,3 @@
-
 const firebaseConfig = { 
     apiKey: "AIzaSyAy7ibJyu2Qn_BPTOT-Kmu-aGQ5X9jjOZ0", 
     authDomain: "urban-management-platform.firebaseapp.com", 
@@ -13,7 +12,6 @@ const db = firebase.firestore();
 let unsubscribeFromGrievances = null;
 let currentFilter = 'all';
 
-
 function showView(viewId) {
     const views = ['login-view', 'dashboard-view', 'department-selection-view', 'grievance-list-view', 'announcement-view'];
     views.forEach(id => {
@@ -22,12 +20,10 @@ function showView(viewId) {
     
     document.getElementById(viewId).classList.remove('hidden');
     
-    
     if(viewId !== 'login-view') {
         document.getElementById('dashboard-view').classList.remove('hidden');
     }
 }
-
 
 document.getElementById('login-form').onsubmit = (e) => {
     e.preventDefault();
@@ -50,7 +46,6 @@ document.getElementById('logout-button').onclick = () => {
     window.location.reload();
 };
 
-
 function showAnnouncementView() {
     showView('announcement-view');
     loadAnnouncements();
@@ -58,8 +53,8 @@ function showAnnouncementView() {
 
 function filterAnnouncements(filter) {
     currentFilter = filter;
-    document.querySelectorAll('.filter-btn').forEach(btn => btn.classList.remove('active'));
-    document.getElementById(`filter-${filter}`).classList.add('active');
+    document.querySelectorAll('.filter-btn').forEach(btn => btn.classList.remove('active')); 
+    document.getElementById(`filter-${filter}`).classList.add('bg-blue-100', 'text-blue-700'); 
     loadAnnouncements();
 }
 
@@ -88,10 +83,10 @@ function loadAnnouncements() {
             const d = doc.data();
             const isPub = d.status === 'published';
             const div = document.createElement('div');
-            div.className = 'white-panel p-5 flex justify-between items-center';
+            div.className = 'bg-white p-5 flex justify-between items-center rounded-xl border border-slate-200 shadow-sm';
             div.innerHTML = `
                 <div>
-                    <span class="status-badge ${isPub ? 'bg-emerald-100 text-emerald-700' : 'bg-slate-100 text-slate-500'} mb-2 inline-block">${d.status}</span>
+                    <span class="px-2 py-1 text-[10px] font-bold uppercase rounded-md ${isPub ? 'bg-emerald-100 text-emerald-700' : 'bg-slate-100 text-slate-500'} mb-2 inline-block">${d.status}</span>
                     <h4 class="font-bold text-slate-800">${d.title}</h4>
                     <p class="text-slate-500 text-xs mt-1">${d.content}</p>
                 </div>
@@ -107,9 +102,6 @@ function loadAnnouncements() {
 window.updateAnnStatus = (id, cur) => db.collection("announcements").doc(id).update({ status: cur === 'published' ? 'unpublished' : 'published' });
 window.deleteAnn = (id) => confirm("Permanently archive this announcement?") && db.collection("announcements").doc(id).delete();
 
-// ==========================
-// STATISTICS
-// ==========================
 function loadStats() {
     db.collection("grievances").onSnapshot(snap => {
         let s=0, p=0, r=0;
@@ -123,7 +115,6 @@ function loadStats() {
         document.getElementById('resolved-count').innerText = r;
     });
 }
-
 
 window.showDepartmentGrievances = (dept) => {
     showView('grievance-list-view');
@@ -149,16 +140,17 @@ window.showDepartmentGrievances = (dept) => {
             return;
         }
 
-        
         const promises = snapshot.docs.map(async (doc) => {
             const data = doc.data();
-            let userName = "Unknown User";
+            let userName = data.userName || "Unknown User"; 
             
-            if (data.userId) {
+            if ((!data.userName || data.userName === "Anonymous") && data.userId) {
                 try {
                     const userDoc = await db.collection("users").doc(data.userId).get();
-                    if (userDoc.exists) userName = userDoc.data().name || "Citizen";
-                } catch (e) { console.log(e); }
+                    if (userDoc.exists && userDoc.data().name) {
+                        userName = userDoc.data().name;
+                    }
+                } catch (e) { console.log("Error fetching user:", e); }
             }
             return { id: doc.id, data, userName };
         });
@@ -171,68 +163,41 @@ window.showDepartmentGrievances = (dept) => {
     });
 };
 
-
-
 function renderGrievanceCard(docId, data, userName) {
     const container = document.getElementById('grievance-list-container');
     const date = data.timestamp ? data.timestamp.toDate().toLocaleString() : 'N/A';
+    const address = data.address || "No address provided"; 
     
-    // 1. Badge Logic
     let badgeClass = 'bg-blue-100 text-blue-700';
     if (data.status === 'In Progress') badgeClass = 'bg-emerald-100 text-emerald-700';
     else if (data.status === 'On Hold') badgeClass = 'bg-amber-100 text-amber-700';
     else if (data.status === 'Resolved') badgeClass = 'bg-slate-200 text-slate-600';
 
-    // 2. Define Tailwind Button Styles (Directly in JS to ensure colors work)
     const baseBtnStyle = "px-4 py-2 text-xs font-bold text-white uppercase rounded-lg shadow-md transition-all transform hover:-translate-y-0.5 border-none cursor-pointer";
     const btnGreen = `${baseBtnStyle} bg-emerald-500 hover:bg-emerald-600`;
     const btnYellow = `${baseBtnStyle} bg-amber-500 hover:bg-amber-600`;
     const btnRed = `${baseBtnStyle} bg-red-500 hover:bg-red-600`;
-    const btnDisabled = "px-4 py-2 text-xs font-bold text-slate-400 uppercase bg-slate-200 rounded-lg cursor-not-allowed border-none";
 
-    // 3. Button Workflow Logic
     let actionButtonsHtml = '';
 
-    // CASE 1: Submitted -> Show "In Progress" (Green)
     if (!data.status || data.status === 'Submitted') {
-        actionButtonsHtml = `
-            <button onclick="updateStatus('${docId}', 'In Progress')" class="${btnGreen}">
-                In Progress
-            </button>
-        `;
+        actionButtonsHtml = `<button onclick="updateStatus('${docId}', 'In Progress')" class="${btnGreen}">In Progress</button>`;
     } 
-    // CASE 2: In Progress -> Show "Mark Resolved" (Green) + "On Hold" (Yellow)
     else if (data.status === 'In Progress') {
         actionButtonsHtml = `
-            <button onclick="updateStatus('${docId}', 'Resolved')" class="${btnGreen}">
-                Mark Resolved
-            </button>
-            <button onclick="updateStatus('${docId}', 'On Hold')" class="${btnYellow}">
-                On Hold
-            </button>
+            <button onclick="updateStatus('${docId}', 'Resolved')" class="${btnGreen}">Mark Resolved</button>
+            <button onclick="updateStatus('${docId}', 'On Hold')" class="${btnYellow}">On Hold</button>
         `;
     } 
-    // CASE 3: On Hold -> Show "Resume Progress" (Green)
     else if (data.status === 'On Hold') {
-        actionButtonsHtml = `
-            <button onclick="updateStatus('${docId}', 'In Progress')" class="${btnGreen}">
-                Resume Progress
-            </button>
-        `;
+        actionButtonsHtml = `<button onclick="updateStatus('${docId}', 'In Progress')" class="${btnGreen}">Resume Progress</button>`;
     } 
-    // CASE 4: Resolved -> Show "Delete" (Red) only
     else if (data.status === 'Resolved') {
-        actionButtonsHtml = `
-            <button onclick="deleteGrievance('${docId}')" class="${btnRed}">
-                Delete Record
-            </button>
-        `;
+        actionButtonsHtml = `<button onclick="deleteGrievance('${docId}')" class="${btnRed}">Delete Record</button>`;
     }
 
-    // 4. Render Card
     const card = document.createElement('div');
-    // Using Tailwind classes for the card container
-    card.className = 'bg-white border border-slate-200 rounded-xl shadow-sm hover:shadow-md transition-shadow flex flex-col justify-between overflow-hidden mb-6'; 
+    card.className = 'bg-white border border-slate-200 rounded-xl shadow-sm hover:shadow-md transition-shadow flex flex-col justify-between overflow-hidden mb-6 grievance-card'; 
     card.id = `card-${docId}`;
     
     card.innerHTML = `
@@ -245,8 +210,16 @@ function renderGrievanceCard(docId, data, userName) {
                 <span class="text-xs text-slate-400 font-medium text-right">${date}</span>
             </div>
 
-            <p class="text-slate-600 text-sm leading-relaxed mb-6">${data.description}</p>
+            <p class="text-slate-600 text-sm leading-relaxed mb-4">${data.description}</p>
             
+            <div class="flex items-start gap-2 mb-4 p-2 bg-slate-50 rounded-lg">
+                <svg class="w-4 h-4 text-slate-400 mt-0.5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                </svg>
+                <span class="text-xs font-medium text-slate-600 break-words">${address}</span>
+            </div>
+
             <div class="flex items-center gap-3 p-3 bg-slate-50 rounded-lg border border-slate-100">
                 <div class="w-8 h-8 rounded-full bg-white border border-slate-200 flex items-center justify-center text-slate-600 font-bold text-xs shadow-sm">
                     ${userName.charAt(0).toUpperCase()}
@@ -272,10 +245,6 @@ function renderGrievanceCard(docId, data, userName) {
     container.appendChild(card);
 }
 
-// ... rest of your script ...
-// ==========================
-// ACTIONS
-// ==========================
 window.updateStatus = (docId, newStatus) => {
     db.collection("grievances").doc(docId).update({ status: newStatus })
       .catch(err => alert("Error updating status"));
@@ -295,9 +264,6 @@ window.searchGrievances = () => {
     });
 };
 
-// ==========================
-// INITIALIZATION
-// ==========================
 if(sessionStorage.getItem('loggedInUserEmail')) { 
     document.getElementById('welcome-message').innerText = sessionStorage.getItem('loggedInUserEmail');
     showView('department-selection-view');
