@@ -101,7 +101,7 @@ class GrievanceFormFragment : Fragment() {
     private fun submitGrievance() {
         val title = titleEditText.text.toString().trim()
         val description = descriptionEditText.text.toString().trim()
-        val address= addressEditText.text.toString().trim()
+        val address = addressEditText.text.toString().trim()
 
         if (title.isEmpty() || description.isEmpty() || address.isEmpty()) {
             Toast.makeText(context, "These fields cannot be empty.", Toast.LENGTH_SHORT).show()
@@ -118,7 +118,7 @@ class GrievanceFormFragment : Fragment() {
             storageRef.putFile(imageUri!!)
                 .addOnSuccessListener {
                     storageRef.downloadUrl.addOnSuccessListener { uri ->
-                        saveGrievanceToFirestore(title, description, uri.toString())
+                        saveGrievanceToFirestore(title, description, address, uri.toString())
                     }
                 }
                 .addOnFailureListener { e ->
@@ -126,11 +126,11 @@ class GrievanceFormFragment : Fragment() {
                     setLoading(false)
                 }
         } else {
-            saveGrievanceToFirestore(title, description, null)
+            saveGrievanceToFirestore(title, description, address, null)
         }
     }
 
-    private fun saveGrievanceToFirestore(title: String, description: String, imageUrl: String?) {
+    private fun saveGrievanceToFirestore(title: String, description: String, address: String, imageUrl: String?) {
         val userId = auth.currentUser?.uid
         if (userId == null) {
             Toast.makeText(context, "You must be logged in to submit a grievance.", Toast.LENGTH_LONG).show()
@@ -140,7 +140,6 @@ class GrievanceFormFragment : Fragment() {
 
         db.collection("users").document(userId).get()
             .addOnSuccessListener { documentSnapshot ->
-
                 val userName = documentSnapshot.getString("name") ?: "Anonymous"
 
                 val locationData = if (latitude != 0.0 && longitude != 0.0) {
@@ -158,6 +157,7 @@ class GrievanceFormFragment : Fragment() {
                     "department" to departmentName,
                     "title" to title,
                     "description" to description,
+                    "address" to address,
                     "imageUrl" to imageUrl,
                     "timestamp" to Date(),
                     "status" to "Submitted",
