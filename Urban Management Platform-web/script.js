@@ -9,6 +9,41 @@ const firebaseConfig = {
 firebase.initializeApp(firebaseConfig);
 const db = firebase.firestore();
 
+const OLA_MAPS_API_KEY = "ENTER_YOUR_API_KEY_HERE"; 
+
+window.openMapModal = async (lng, lat, addressText) => {
+    document.getElementById('map-modal').classList.remove('hidden');
+    const mapContainer = document.getElementById('map');
+    mapContainer.innerHTML = ''; 
+    
+    try {
+        const olaMaps = new OlaMaps({ apiKey: OLA_MAPS_API_KEY });
+        
+        const myMap = await olaMaps.init({
+            style: "https://api.olamaps.io/tiles/vector/v1/styles/default-light-standard/style.json",
+            container: 'map',
+            center: [lng, lat], 
+            zoom: 16, 
+        });
+
+        const popup = new OlaMaps.Popup({ offset: [0, -30] })
+            .setHTML(`<div style="padding: 8px; font-family: Inter, sans-serif; font-size: 12px; font-weight: 600; color: #1e293b; max-width: 200px;">${addressText}</div>`);
+
+        new OlaMaps.Marker({ color: '#ef4444' }) 
+            .setLngLat([lng, lat])
+            .setPopup(popup)
+            .addTo(myMap);
+
+    } catch (error) {
+        console.error("Error loading Ola Maps:", error);
+        mapContainer.innerHTML = `<div class="w-full h-full flex items-center justify-center text-red-500 font-bold">Failed to load map. Check API Key.</div>`;
+    }
+};
+
+window.closeMapModal = () => {
+    document.getElementById('map-modal').classList.add('hidden');
+};
+
 let unsubscribeFromGrievances = null;
 let currentFilter = 'all';
 
@@ -196,6 +231,21 @@ function renderGrievanceCard(docId, data, userName) {
         actionButtonsHtml = `<button onclick="deleteGrievance('${docId}')" class="${btnRed}">Delete Record</button>`;
     }
 
+    let addressHtml = `<span class="text-xs font-medium text-slate-600 break-words">${address}</span>`;
+    
+    
+    const safeAddress = address.replace(/'/g, "\\'").replace(/"/g, '&quot;');
+
+    if (data.location && data.location.latitude && data.location.longitude) {
+        addressHtml = `
+            <span onclick="openMapModal(${data.location.longitude}, ${data.location.latitude}, '${safeAddress}')" 
+                  class="text-xs font-medium text-blue-600 break-words cursor-pointer hover:underline flex items-center gap-1 group">
+                ${address} 
+                <span class="bg-blue-50 text-blue-600 group-hover:bg-blue-100 px-1.5 py-0.5 rounded text-[9px] uppercase font-bold border border-blue-200 transition-colors ml-1 whitespace-nowrap">View Map</span>
+            </span>
+        `;
+    }
+
     const card = document.createElement('div');
     card.className = 'bg-white border border-slate-200 rounded-xl shadow-sm hover:shadow-md transition-shadow flex flex-col justify-between overflow-hidden mb-6 grievance-card'; 
     card.id = `card-${docId}`;
@@ -217,7 +267,7 @@ function renderGrievanceCard(docId, data, userName) {
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
                 </svg>
-                <span class="text-xs font-medium text-slate-600 break-words">${address}</span>
+                ${addressHtml}
             </div>
 
             <div class="flex items-center gap-3 p-3 bg-slate-50 rounded-lg border border-slate-100">
